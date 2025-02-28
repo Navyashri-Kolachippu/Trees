@@ -40,5 +40,32 @@ namespace Trees.Operations
             }
             return data;
         }
+
+        //Time complexity O(n) space complexity O(logN)
+        public void Preorder(Node root)
+        {
+            if(root == null) return;
+            Console.Write(root.data + ",");
+            Preorder(root.left);
+            Preorder(root.right);
+        }
+
+        //Time complexity O(n) space complexity O(logN)
+        public void Inorder(Node root)
+        {
+            if (root == null) return;
+            Inorder(root.left);
+            Console.Write(root.data + ",");
+            Inorder(root.right);
+        }
+
+        //Time complexity O(n) space complexity O(logN)
+        public void Postorder(Node root)
+        {
+            if (root == null) return;
+            Postorder(root.left);
+            Postorder(root.right);
+            Console.Write(root.data + ",");
+        }
     }
 }
