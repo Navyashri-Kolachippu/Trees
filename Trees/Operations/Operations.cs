@@ -11,9 +11,9 @@ namespace Trees.Operations
         public static Node CreateTree()
         {
             Node root = new Node(1);
-            root.left= new Node(2);
-            root.right= new Node(3);
-            root.left.left=new Node(4);
+            root.left = new Node(2);
+            root.right = new Node(3);
+            root.left.left = new Node(4);
             return root;
         }
 
@@ -44,7 +44,7 @@ namespace Trees.Operations
         //Time complexity O(n) space complexity O(logN)
         public void Preorder(Node root)
         {
-            if(root == null) return;
+            if (root == null) return;
             Console.Write(root.data + ",");
             Preorder(root.left);
             Preorder(root.right);
@@ -66,6 +66,37 @@ namespace Trees.Operations
             Postorder(root.left);
             Postorder(root.right);
             Console.Write(root.data + ",");
+        }
+
+        //BFS
+        //Time complexity O(n) space complexity O(N)
+        public static List<List<int>> LevelOrder(Node root)
+        {
+            List<List<int>> traversed = new List<List<int>>();
+            Queue<Node> queue = new Queue<Node>();
+            if (root == null) return traversed;
+            queue.Enqueue(root);
+            while (queue.Count > 0)
+            {
+                int level = queue.Count();
+                List<int> sublist = new List<int>();
+                for (int i = 0; i < level; i++)
+                {
+                    Node value = queue.Peek();
+                    queue.Dequeue();
+                    if (value.left != null)
+                    {
+                        queue.Enqueue(value.left);
+                    }
+                    if (value.right != null)
+                    {
+                        queue.Enqueue(value.right);
+                    }
+                    sublist.Add(value.data);
+                }
+                traversed.Add(sublist);
+            }
+            return traversed;
         }
     }
 }
