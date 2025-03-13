@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
@@ -162,6 +164,45 @@ namespace Trees.Operations
             return traversed;
         }
 
+        //Time complexity O(n) space complexity O(2N)
+        public static IList<int> PostorderTraversal1Stack(Node root)
+        {
+            List<int> traversed = new List<int>();
+
+            Stack<Node> stack = new Stack<Node>();
+
+            Node curr = root;
+
+            while (curr != null || stack.Count != 0)
+            {
+                if (curr != null)
+                {
+                    stack.Push(curr);
+                    curr = curr.left;
+                }
+                else
+                {
+                    Node temp = stack.Peek().right;
+                    if (temp == null)
+                    {
+                        temp = stack.Pop();
+                        traversed.Add(temp.data);
+                        while (stack.Count() > 0 && stack.Peek().right == temp)
+                        {
+                            temp = stack.Pop();
+                            traversed.Add(temp.data);
+                        }
+                    }
+                    else
+                    {
+                        curr = temp;
+                    }
+                }
+            }
+
+            return traversed;
+        }
+
         //Time complexity O(n) space complexity O(N)
         public static int Maxheight(Node root)
         {
@@ -206,10 +247,241 @@ namespace Trees.Operations
         {
             if (root == null) return 0;
             int lr = CheckMaxDia(root.left, diam);
-            int rr= CheckMaxDia(root.right, diam);
+            int rr = CheckMaxDia(root.right, diam);
             diam[0] = Math.Max(diam[0], lr + rr);
-            return 1+ Math.Max(lr, rr);
+            return 1 + Math.Max(lr, rr);
 
         }
+
+        //Time complexity O(n) space complexity O(N)
+        public static int MaxPathSum(Node root)
+        {
+            int max = root.data;
+            PathSum(root, ref max);
+            return max;
+        }
+
+        public static int PathSum(Node root, ref int max)
+        {
+            if (root == null) return 0;
+
+            int lr = Math.Max(0, PathSum(root.left, ref max));
+            int rr = Math.Max(0, PathSum(root.right, ref max));
+            max = Math.Max(max, (root.data + (lr + rr)));
+
+            return root.data + Math.Max(lr, rr);
+        }
+
+        //Time complexity O(n) space complexity O(N)
+        public static bool SameTree(Node root1, Node root2)
+        {
+            if (root1 == null && root2 == null) return root1 == root2;
+            return SameTree(root1.left, root2.left) && SameTree(root1.right, root2.right) && (root1.data == root2.data);
+        }
+
+        //Time complexity O(n) space complexity O(N)
+        public static List<List<int>> Zigzagtraversal(Node root)
+        {
+            List<List<int>> zigzag = new List<List<int>>();
+            if (root == null) return zigzag;
+            bool flag = true;// true l->r,r->l false
+            Queue<Node> queue = new Queue<Node>();
+            queue.Enqueue(root);
+            while (queue.Count > 0)
+            {
+                int capacity = queue.Count;
+                List<int> list = new List<int>();
+                for (int i = 0; i < capacity; i++)
+                {
+                    Node temp = queue.Dequeue();
+                    if (flag)
+                        list.Add(temp.data); // Normal order
+                    else
+                        list.Insert(0, temp.data); // Reverse order (Insert at front)
+
+                    if (temp.left != null)
+                    {
+                        queue.Enqueue(temp.left);
+                    }
+                    if (temp.right != null)
+                    {
+                        queue.Enqueue(temp.right);
+                    }
+                }
+                zigzag.Add(list);
+                flag = !flag;
+            }
+
+            return zigzag;
+        }
+
+        //Time complexity O(n) space complexity O(N)
+        public static bool isLeaf(Node root)
+        {
+            if (root.right == null && root.left == null) return true;
+            else return false;
+        }
+
+        public static void lefttraversal(Node root, List<int> list)
+        {
+            Node curr = root.left;
+            while (curr != null)
+            {
+                if (!isLeaf(curr)) list.Add(curr.data);
+                if (curr.left != null) { curr = curr.left; }
+                else { curr = curr.right; }
+            }
+        }
+        public static void righttraversal(Node root, List<int> list)
+        {
+            Node curr = root.right;
+            List<int> tmp = new List<int>();
+            while (curr != null)
+            {
+                if (!isLeaf(curr)) tmp.Add(curr.data);
+                if (curr.right != null) { curr = curr.right; }
+                else { curr = curr.left; }
+            }
+            for (int i = tmp.Count - 1; i >= 0; i--)
+            {
+                list.Add(tmp[i]);
+            }
+
+        }
+
+        public static void leaftraversal(Node root, List<int> list)
+        {
+            if (isLeaf(root))
+            {
+                list.Add(root.data);
+                return;
+            }
+
+            if (root.left != null) leaftraversal(root.left, list);
+            if (root.right != null) leaftraversal(root.right, list);
+
+        }
+        public static List<int> BoundaryTraversal(Node root)
+        {
+            List<int> list = new List<int>();
+            if (root == null) return list;
+            if (isLeaf(root) == false) list.Add(root.data);
+
+            lefttraversal(root, list);
+            leaftraversal(root, list);
+            righttraversal(root, list);
+            return list;
+
+        }
+
+        //Vertical traversal
+
+        public class Traverse
+        {
+            public Node node;
+            public int level;
+            public Traverse(Node node, int level)
+            {
+                this.node = node;
+                this.level = level;
+            }
+        }
+
+        public static List<List<int>> VerticalTraversal(Node root)
+        {
+            List<List<int>> result = new List<List<int>>();
+            if (root == null) return result;
+
+            // Dictionary to store nodes based on horizontal distance
+            SortedDictionary<int, List<int>> map = new SortedDictionary<int, List<int>>();
+
+            Queue<Traverse> queue = new Queue<Traverse>();
+            queue.Enqueue(new Traverse(root, 0));
+
+            while (queue.Count > 0)
+            {
+                int size = queue.Count;
+                Dictionary<int, List<int>> temp = new Dictionary<int, List<int>>();
+
+                for (int i = 0; i < size; i++)
+                {
+                    Traverse check = queue.Dequeue();
+
+                    // Store nodes in a temporary dictionary to maintain row order
+                    if (!temp.ContainsKey(check.level))
+                        temp[check.level] = new List<int>();
+
+                    temp[check.level].Add(check.node.data);
+
+                    if (check.node.left != null) queue.Enqueue(new Traverse(check.node.left, check.level - 1));
+                    if (check.node.right != null) queue.Enqueue(new Traverse(check.node.right, check.level + 1));
+                }
+
+                // Sort each level's nodes before adding to map
+                foreach (var key in temp.Keys)
+                {
+                    if (!map.ContainsKey(key))
+                        map[key] = new List<int>();
+
+                    temp[key].Sort();
+                    map[key].AddRange(temp[key]);
+                }
+            }
+
+            // Convert map to list of lists
+            foreach (var key in map.Keys)
+                result.Add(map[key]);
+
+            return result;
+        }
+
+        public static List<int> TopTraversal(Node root)
+        {
+            List<int> result = new List<int>();
+            if (root == null) return result;
+            SortedDictionary<int, int> data = new SortedDictionary<int, int>();
+            Queue<Traverse> queue = new Queue<Traverse>();
+            queue.Enqueue(new Traverse(root, 0));
+            while (queue.Count > 0)
+            {
+                Traverse current = queue.Dequeue();
+
+                if (!data.ContainsKey(current.level))
+                    data.Add(current.level, current.node.data);
+                if (current.node.left != null) queue.Enqueue(new Traverse(current.node.left, current.level - 1));
+                if (current.node.right != null) queue.Enqueue(new Traverse(current.node.right, current.level + 1));
+
+            }
+
+            foreach (var key in data.Keys)
+            {
+                result.Add(data[key]);
+            }
+
+            return result;
+        }
+
+        public static List<int> BottomView(Node root)
+        {
+            List<int> result = new List<int>();
+            SortedDictionary<int, int> data = new SortedDictionary<int, int>();
+            Queue<Traverse> queue = new Queue<Traverse>();
+            queue.Enqueue(new Traverse(root, 0));
+            while (queue.Count > 0)
+            {
+                Traverse current = queue.Dequeue();
+
+                data[current.level] = current.node.data;
+
+                if (current.node.left != null) queue.Enqueue(new Traverse(current.node.left, current.level - 1));
+                if (current.node.right != null) queue.Enqueue(new Traverse(current.node.right, current.level + 1));
+            }
+            foreach (var item in data.Keys)
+            {
+                result.Add(data[item]);
+            }
+            return result;
+        }
+
     }
 }
